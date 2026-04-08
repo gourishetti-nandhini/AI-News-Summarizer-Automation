@@ -22,8 +22,5 @@ This project is an AI-powered automation workflow built using n8n that collects,
 4. AI generates a structured news summary  
 5. The summary is sent via email automatically  
 
-## 📂 File
-- automation-workflow.json
-
 ## 🎯 Use Case
 This automation reduces manual effort by providing a daily AI news summary and keeps users updated with the latest trends and events.
