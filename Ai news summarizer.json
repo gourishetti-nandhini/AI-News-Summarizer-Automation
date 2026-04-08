@@ -1,0 +1,290 @@
+{
+  "name": "Ai news summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -528,
+        192
+      ],
+      "id": "322de61a-062f-4cc8-9cee-0d29dac44d51",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.normaltech.ai/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "4f3c8e01-d29f-4f5c-b957-f36a7d6a9360",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "url": "https://aibusiness.com/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        192
+      ],
+      "id": "6ca41afe-e41b-430f-b5e4-84c4b5f2d32e",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_events"
+            },
+            {
+              "name": "q",
+              "value": "Events in Austin"
+            },
+            {
+              "name": "api_key",
+              "value": "79bd5f72848491c11705f6a96c433f2d444745f44d41acadf5482ebd446bf5ed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -304,
+        384
+      ],
+      "id": "2e948045-f4e2-4c0f-9371-b37cbe4a671e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -80,
+        176
+      ],
+      "id": "1919c52a-f521-404e-9781-5b5257edb853",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        144,
+        192
+      ],
+      "id": "9cf8d8d1-dd4b-4523-a932-bbc75395b2f7",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data[0] }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an AI newsletter assistant creating a daily intelligence report.|Analyze RSS feeds and event data to create:AI NEWS HIGHLIGHTS[5 most important AI developments]TECHNOLOGY UPDATES==================[Latest tech developments]UPCOMING AI EVENTS[List events with date, location, description]If no events found: \"No AI events scheduled this week\"Format each news item:- Headline in ALL CAPS- 2-3 sentence summary- Article linkSign off as \"Your AI Intelligence Team\""
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        368,
+        192
+      ],
+      "id": "f4c0e1da-2b92-4e6e-9444-cbb5cb6a1411",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxOutputTokens": 2048,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        480,
+        352
+      ],
+      "id": "01163e12-aa92-466b-88fd-4d5ab0bacb62",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ODJ4B1gMOl1kBboD",
+          "name": "Google Gemini(PaLM) Api account 8320"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "gourishettinandhini@gmail.com",
+        "subject": "AI NEWS",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        192
+      ],
+      "id": "1bd530cd-082d-4e33-bb7c-b32cb2a7d209",
+      "name": "Send a message",
+      "webhookId": "9e7f0146-218e-44aa-bb18-fa2cce827f34",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Qa1eSmlXhW5znO0F",
+          "name": "Gmail account 2270"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4f92fb05-30b8-4f88-9e97-24457ba27110",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "iePFk25hA4l8GcUp",
+  "tags": []
+}
